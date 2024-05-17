@@ -1,0 +1,67 @@
+general:
+  name: llama-tts_libritts_r_trial01
+  gpu_ids: [0,1,2,3,4,5,6,7]
+  num_gpus: 8
+  wandb: true
+  wandb_project_name: llama-tts
+  wandb_run_name: llama-tts_libritts_r_trial01
+  checkpoint_dir: /home/rmaia/experiments/llama-tts
+
+data:
+  train_meta: /home/rmaia/corpora/LibriTTS_R/libritts_r.tsv
+
+train:
+  n_workers: 2
+  batch_size: 48
+  seed: 20180221
+  dist: false
+  pin_memory: true
+  optimizer: adamw_zero
+  optimizer_params:
+    lr: !!float 3e-5
+    weight_decay: !!float 1e-2
+    beta1: 0.9
+    beta2: 0.96
+
+audio:
+  sample_rate: 24000
+  max_speech_dur: 23
+  num_mel_channels: 100
+  mel_fmin: 0.0
+  mel_fmax: 12000.0
+  filter_length: 1024
+  hop_length: 256
+  win_length: 1024
+  do_diff_normalization: true
+  mel_tokens_hop_length: 512
+  number_mel_tokens: 8193
+
+text:
+  tokenizer_base_model: 'google-bert/bert-base-cased' #meta-llama/Meta-Llama-3-8B'
+  number_text_tokens: 16384
+
+model:
+  llm_base_model: 'meta-llama/Meta-Llama-3-8B'
+  voice_encoder_depth: 6
+  max_text_tokens: 750
+  max_mel_tokens: 1500
+  should_skip_very_long_speech: true
+  should_skip_very_long_text: true
+  losses:
+    text_ce:
+      weight: .01
+    mel_ce:
+      weight: 1
+
+logger:
+  summary_interval: 5
+  save_interval: 5000
+
+#### path
+#path:
+#  pretrain_model_ar: /mnt/fancy-river/workspace/experiments_rmaia/finetune_gargamel_06_new_data/models/2900_ar_ema.pth
+#  strict_load: true
+#  log: /mnt/fancy-river/workspace/experiments_claudio/logs
+#  resume_state: /mnt/fancy-river/workspace/experiments/parrot_v3/training_state/55000.state
+
+
