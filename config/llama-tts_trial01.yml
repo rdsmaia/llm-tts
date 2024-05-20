@@ -6,6 +6,7 @@ general:
   wandb_project_name: llama-tts
   wandb_run_name: llama-tts_libritts_r_trial01
   checkpoint_dir: /home/rmaia/experiments/llama-tts
+  log_dir: /home/rmaia/experiments/llama-tts/logs
 
 data:
   train_meta: /home/rmaia/corpora/LibriTTS_R/libritts_r.tsv
@@ -56,12 +57,5 @@ model:
 logger:
   summary_interval: 5
   save_interval: 5000
-
-#### path
-#path:
-#  pretrain_model_ar: /mnt/fancy-river/workspace/experiments_rmaia/finetune_gargamel_06_new_data/models/2900_ar_ema.pth
-#  strict_load: true
-#  log: /mnt/fancy-river/workspace/experiments_claudio/logs
-#  resume_state: /mnt/fancy-river/workspace/experiments/parrot_v3/training_state/55000.state
 
 

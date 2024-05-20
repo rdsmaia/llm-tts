@@ -1,5 +1,6 @@
 import random
 import torch
+import torchaudio
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
@@ -17,11 +18,11 @@ def load_libritts_r(filename):
     return metadata
 
 
-def create_dataloader(dataset,
-                      hparams,
+def create_dataloader(hparams,
                       sampler=None,
                       collate_fn=None,
                       shuffle=True):
+    dataset = TextSpeechDataset(hparams)
     if hparams.train.dist:
         world_size = torch.distributed.get_world_size()
         num_workers = hparams.train.n_workers
@@ -38,11 +39,6 @@ def create_dataloader(dataset,
                       drop_last=True,
                       pin_memory=hparams.train.pin_memory,
                       collate_fn=collate_fn)
-
-
-def create_dataset(dataset_opt):
-    dataset = TextSpeechDataset(dataset_opt)
-    return dataset
 
 
 class TextSpeechDataset(Dataset):
@@ -81,6 +77,9 @@ class TextSpeechDataset(Dataset):
             s, sr = load_audio(audiofile)
         else:
             raise ValueError(f'Unknown audio format: {ext}\n')
+        if sr != self.sample_rate:
+            s = torchaudio.functional.resample(s, sr, self.sample_rate)
+            sr = self.sample_rate
         assert sr == self.sample_rate, "sample rate mismatch: sr={sr} and sample_rate={self.sample_rate}"
         return s
 
@@ -149,8 +148,7 @@ class TextSpeechDataset(Dataset):
 if __name__ == '__main__':
     cfg = OmegaConf.load("config/llama-tts_trial01.yml")
     cfg.train.batch_size = 4
-    dataset = create_dataset(cfg)
-    dataloader = create_dataloader(dataset, cfg)
+    dataloader = create_dataloader(cfg)
     for i, batch in enumerate(dataloader):
         print(f'* batch {i}, real text: {batch["text"]}')
         print(f'\ttext tokens: {batch["text_tokens"]}\n')
