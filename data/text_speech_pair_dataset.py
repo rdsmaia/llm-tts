@@ -7,15 +7,12 @@ from transformers import AutoTokenizer
 from utils.audio import load_audio
 from omegaconf import OmegaConf
 
+import pandas as pd
 
 def load_libritts_r(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        metadata = []
-        for line in f:
-            components = line.strip().split('|')
-            assert len(components) == 3, f'{filename} contains bad entries: {line}'
-            metadata.append([components[0], components[1], components[2]])
-    return metadata
+    metadata = pd.read_csv(filename, encoding='utf-8', sep='|', header=None)
+    assert metadata.shape[1] == 3
+    return metadata.values.tolist()
 
 
 def create_dataloader(hparams,
